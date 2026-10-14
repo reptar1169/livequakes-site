@@ -137,3 +137,10 @@ Never commit a real API key or Wi-Fi password. `Pi Pico/config.py` and
   [ODC-BY 1.0](https://opendatacommons.org/licenses/by/1-0/).
 - **Base map:** [Natural Earth](https://www.naturalearthdata.com/) (public domain).
 - **ZIP code locations:** U.S. Census Bureau ZCTA Gazetteer, 2024 (public domain).
+
+## License
+
+The code is released under the [MIT License](LICENSE). The generated data files keep their
+sources' terms. `public/plates.json` is derived from PB2002 and stays under ODC-BY 1.0, which
+requires attribution. `public/map-detail.json` and `functions/data/zcta.json` are derived from
+public-domain sources.
