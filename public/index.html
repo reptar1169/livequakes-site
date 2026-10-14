@@ -364,9 +364,11 @@
   .map-land { fill: color-mix(in srgb, var(--ink) 11%, var(--surface)); stroke: var(--baseline); stroke-width: 0.4; vector-effect: non-scaling-stroke; }
   /* overflow: hidden keeps zoomed-in land/dots from painting over the panel header */
   .map-chart-wrap { position: relative; overflow: hidden; }
-  .map-border { fill: none; stroke: var(--baseline); vector-effect: non-scaling-stroke; pointer-events: none; }
-  .map-border.country { stroke-width: 1; }
-  .map-border.state { stroke-width: 0.7; stroke-dasharray: 3 2; }
+  /* Mixed from --ink (not --baseline, which is nearly the land color in dark
+     mode) so borders stay visible on land in both themes. */
+  .map-border { fill: none; vector-effect: non-scaling-stroke; pointer-events: none; }
+  .map-border.country { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 1.2; }
+  .map-border.state { stroke: color-mix(in srgb, var(--ink) 40%, transparent); stroke-width: 1; stroke-dasharray: 4 3; }
   svg#mapSvg { cursor: grab; touch-action: none; }
   svg#mapSvg.panning { cursor: grabbing; }
   .map-controls { position: absolute; top: 20px; right: 22px; display: flex; flex-direction: column; gap: 5px; }
