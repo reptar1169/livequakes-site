@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Community seismometer stations. Anyone can read the station list and
+    // its recent events (that's what powers the public map). All writes go
+    // through Cloud Functions using the Admin SDK, which bypasses these
+    // rules entirely -- so every client write is denied here on purpose.
+    // Registration requires a signed-in user (checked in the function);
+    // event ingestion requires a per-station API key (also checked in the
+    // function, since Firestore rules can't validate a hashed API key
+    // against a request header).
+    // Cached USGS hazard/catalog results for the area-risk lookup. Only the
+    // areaRisk function (Admin SDK) touches these; clients use /api/risk.
+    match /riskCache/{cellId} {
+      allow read, write: if false;
+    }
+
+    match /stations/{stationId} {
+      allow read: if true;
+      allow write: if false;
+
+      match /events/{eventId} {
+        allow read: if true;
+        allow write: if false;
+      }
+    }
+  }
+}

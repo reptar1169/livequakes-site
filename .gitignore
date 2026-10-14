@@ -1,0 +1,13 @@
+.firebase/
+node_modules/
+.DS_Store
+service-account-key.json
+*-firebase-adminsdk-*.json
+__pycache__/
+*.pyc
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+.env
+.env.*

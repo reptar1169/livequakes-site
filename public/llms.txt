@@ -1,0 +1,60 @@
+# LiveQuakes
+
+> Free, real-time earthquake tracker. The map and event list are built live
+> in the visitor's browser from the USGS Earthquake Hazards Program's public
+> GeoJSON feeds, plus reports from a community network of citizen-run
+> seismometers.
+
+LiveQuakes (https://livequakes.com/) shows recent earthquakes worldwide on an
+interactive, zoomable world map and a sortable list, filterable by minimum
+magnitude, time range (past hour / day / 7 days / 30 days), and place name.
+It also supports "near me" distance filtering and browser notifications for
+new quakes above a chosen magnitude.
+
+All earthquake data comes directly from the USGS Earthquake Hazards Program
+(https://earthquake.usgs.gov/earthquakes/feed/v1.0/) -- LiveQuakes does not
+independently detect or verify earthquakes; it is a live viewer for USGS's
+public data.
+
+## Regional pages
+
+Live earthquake pages filtered to individual U.S. states, each with a short
+summary of the region's main earthquake sources and notable historic quakes:
+
+- California: https://livequakes.com/california
+- Nevada: https://livequakes.com/nevada
+- Oregon: https://livequakes.com/oregon
+- Washington: https://livequakes.com/washington
+- Alaska: https://livequakes.com/alaska
+- Hawaii: https://livequakes.com/hawaii
+
+Individual earthquakes can be linked directly as
+https://livequakes.com/#quake=<USGS event id>.
+
+## Earthquake risk lookup
+
+Visitors can enter a U.S. ZIP code (or use their location) to see the
+long-term chance of strong, very strong, and severe shaking (Modified Mercalli
+intensity VI, VII, VIII and above) over the next 50 years, from the USGS
+National Seismic Hazard Model (2023 for the lower 48 and Alaska, 2021 for
+Hawaii), for a typical stiff-soil site. Results also list M5+ earthquakes
+within 50 km since 1950 and the distance to the nearest major plate boundary.
+These are long-term forecasts, not predictions; LiveQuakes does not claim to
+predict earthquakes. Shareable as https://livequakes.com/?zip=<ZIP>#risk.
+
+## Community seismometer network
+
+Anyone who owns a seismometer (Raspberry Shake, DIY accelerometer-based
+sensor, etc.) can register it on LiveQuakes and have it report ground-motion
+events, shown on the same map as community station markers alongside the
+official USGS data. Registration and event ingestion happen via a simple
+HTTPS API (station registration returns a per-station API key; events are
+POSTed as JSON with an amplitude and duration).
+
+## Key facts
+
+- Data source: USGS Earthquake Hazards Program (public domain feeds)
+- Coverage: global
+- Update frequency: user-configurable auto-refresh (30s / 1min / 5min) plus manual refresh
+- Cost: free, no account required to view; a free account (Google sign-in) is only needed to register a community seismometer station
+- Privacy: earthquake data is fetched client-side in the visitor's own browser; nothing about page views is sent to or stored by LiveQuakes
