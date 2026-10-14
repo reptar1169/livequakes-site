@@ -25,7 +25,8 @@ SITE = "https://livequakes.com"
 
 # match: regex (case-insensitive) tested against the USGS "place" string, e.g.
 #   "8 km SW of Westlake Village, CA" / "53 km S of Cantwell, Alaska".
-# bbox: [west, south, east, north] used only for the initial map zoom.
+# bbox: [west, south, east, north] used only for the initial map zoom
+# (west > east means it crosses the antimeridian).
 REGIONS = [
     {
         "slug": "california",
@@ -84,9 +85,8 @@ REGIONS = [
         "slug": "alaska",
         "name": "Alaska",
         "match": r"Alaska|Aleutian",
-        # The far western Aleutians cross 180° and fall outside this box;
-        # they're still listed, just off the initial map view.
-        "bbox": [-180.0, 51.0, -129.0, 71.5],
+        # West > east: the box crosses 180° so the western Aleutians are in view.
+        "bbox": [172.0, 51.0, -129.0, 71.5],
         "about": (
             "Alaska is the most seismically active state in the U.S. and has more large earthquakes than "
             "the rest of the country combined. Most come from the Aleutian subduction zone, where the "

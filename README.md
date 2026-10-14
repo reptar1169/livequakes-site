@@ -8,8 +8,8 @@ USGS data, with a community network of citizen-run seismometers.
 - **Earthquake details** with shareable links (`livequakes.com/#quake=<USGS id>`), felt reports,
   tsunami and PAGER alert flags, and a plain-language description of each magnitude.
 - **State pages** for California, Nevada, Oregon, Washington, Alaska, and Hawaii.
-- **Fault lines**: an optional plate-boundary overlay, plus a detailed base map with state borders
-  when zoomed in (up to 48×).
+- **Street-level map** (MapLibre GL + OpenFreeMap vector tiles) in dark or light to match the
+  site, with an optional plate-boundary ("fault lines") overlay.
 - **Earthquake risk by ZIP code**: the long-term chance of strong shaking from the USGS National
   Seismic Hazard Model, with local quake history. These are forecasts, not predictions.
 - **Community stations**: anyone with a Raspberry Shake or DIY sensor can register it and report
@@ -21,6 +21,7 @@ USGS data, with a community network of citizen-run seismometers.
 
 ```
 Browser ──► USGS GeoJSON feeds          (live quakes, fetched directly in the browser)
+   ├──► OpenFreeMap vector tiles        (basemap, rendered by MapLibre GL)
    │
    ├──► Firebase Hosting                (static site: public/)
    │       └── /api/risk ──► areaRisk   (Cloud Function → USGS hazard model + catalog,
@@ -40,8 +41,7 @@ The state pages are generated from it.
 |---|---|
 | `public/index.html` | The whole site (HTML, CSS, JS). **Edit this, not the state pages.** |
 | `public/<state>.html` | Generated state pages; don't edit by hand. |
-| `public/plates.json` | Plate boundaries, pre-projected for the map (generated). |
-| `public/map-detail.json` | Detailed coastline and borders for zoomed-in views (generated). |
+| `public/plates.geojson` | Plate boundaries for the fault-line overlay and risk lookup (generated). |
 | `public/sitemap.xml` | Generated alongside the state pages. |
 | `functions/index.js` | Cloud Functions: station registration, event ingest, USGS cross-check, area risk. |
 | `functions/data/zcta.json` | ZIP code → location lookup for the risk feature. |
@@ -90,17 +90,24 @@ indexes. The USGS cross-check depends on the index in `firestore.indexes.json`.
 Bump `HISTORY_VERSION` in `functions/index.js` **and** `RISK_API_VERSION` in `public/index.html`
 together. This refreshes cached results in Firestore, browsers, and the CDN.
 
-### Regenerating map data
+### The map
 
-These only need re-running if the source data changes:
+The map is [MapLibre GL JS](https://maplibre.org/) 5.24.0, loaded from cdnjs with an integrity
+hash, using [OpenFreeMap](https://openfreemap.org/) tiles: free, no API key, commercial use
+allowed. The **Dark** and **Positron** styles follow the site theme (`MAP_STYLES` in
+`public/index.html`). Quakes, stations, "near me", and fault lines are GeoJSON layers added in
+`addOverlays()`. They're re-added whenever the basemap style changes.
+
+To switch tile providers (for example, self-hosted [Protomaps](https://protomaps.com/)), change
+`MAP_STYLES` and `MAP_CREDIT`.
+
+### Regenerating fault-line data
+
+Only needed if the source data changes:
 
 ```bash
 # Plate boundaries, from PB2002_boundaries.json (github.com/fraxen/tectonicplates)
-python3 scripts/build_plates.py PB2002_boundaries.json public/plates.json
-
-# Detailed base map, from a folder holding Natural Earth's ne_50m_land,
-# ne_50m_admin_0_boundary_lines_land and ne_50m_admin_1_states_provinces_lines GeoJSON
-python3 scripts/build_map_detail.py path/to/natural-earth public/map-detail.json
+python3 scripts/build_plates.py PB2002_boundaries.json public/plates.geojson
 ```
 
 ## Community station API
@@ -135,12 +142,13 @@ Never commit a real API key or Wi-Fi password. `Pi Pico/config.py` and
 - **Plate boundaries:** Bird, P. (2003), *An updated digital model of plate boundaries*, G³ 4(3);
   GeoJSON by Hugo Ahlenius / Nordpil ([fraxen/tectonicplates](https://github.com/fraxen/tectonicplates)),
   [ODC-BY 1.0](https://opendatacommons.org/licenses/by/1-0/).
-- **Base map:** [Natural Earth](https://www.naturalearthdata.com/) (public domain).
+- **Map tiles:** [OpenFreeMap](https://openfreemap.org/), © [OpenMapTiles](https://www.openmaptiles.org/),
+  data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL). Rendered
+  with [MapLibre GL JS](https://maplibre.org/) (BSD-3-Clause).
 - **ZIP code locations:** U.S. Census Bureau ZCTA Gazetteer, 2024 (public domain).
 
 ## License
 
 The code is released under the [MIT License](LICENSE). The generated data files keep their
-sources' terms. `public/plates.json` is derived from PB2002 and stays under ODC-BY 1.0, which
-requires attribution. `public/map-detail.json` and `functions/data/zcta.json` are derived from
-public-domain sources.
+sources' terms. `public/plates.geojson` is derived from PB2002 and stays under ODC-BY 1.0, which
+requires attribution. `functions/data/zcta.json` is derived from public-domain Census data.
