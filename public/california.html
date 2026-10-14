@@ -1488,21 +1488,25 @@
     var FS_SHRINK = '<path d="M9 3v3a2 2 0 0 1-2 2H4M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>';
     function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement; }
     // The Fullscreen API only renders the fullscreen element and its DOM
-    // descendants; anything positioned elsewhere in the page (like the
-    // hover/click tooltip, which normally lives at the end of <body>) simply
-    // doesn't paint while a different element is fullscreen. So the tooltip
-    // needs to move into #mapWrap for the duration and move back out after —
-    // its `position: fixed` CSS still anchors to the viewport either way, so
-    // the on-screen math (clientX/clientY based) keeps working unchanged.
-    var tooltipHome = els.tooltip.parentNode;
+    // descendants; anything elsewhere in the page simply doesn't paint while
+    // the map is fullscreen. That includes the hover tooltip and the quake /
+    // station popups (all at the end of <body>), so they move into #mapWrap
+    // for the duration and back to their original spot afterwards. They're
+    // all `position: fixed`, so they still anchor to the viewport either way.
+    var floaters = [els.tooltip, els.quakeModalBackdrop, document.getElementById("stationModalBackdrop")]
+      .filter(Boolean)
+      .map(function (el) { return { el: el, parent: el.parentNode, next: el.nextSibling }; });
     function onFsChange() {
       updateFsIcon();
-      if (fsElement() === els.mapWrap) {
-        els.mapWrap.appendChild(els.tooltip);
-      } else if (els.tooltip.parentNode !== tooltipHome) {
-        tooltipHome.appendChild(els.tooltip);
-        hideTooltip();
-      }
+      var inFs = fsElement() === els.mapWrap;
+      // Restore in reverse so each element's original next sibling is already back.
+      (inFs ? floaters : floaters.slice().reverse()).forEach(function (f) {
+        if (inFs) els.mapWrap.appendChild(f.el);
+        else if (f.el.parentNode !== f.parent) {
+          f.parent.insertBefore(f.el, f.next && f.next.parentNode === f.parent ? f.next : null);
+        }
+      });
+      if (!inFs) hideTooltip();
       if (map) setTimeout(function () { map.resize(); }, 50);
     }
     function updateFsIcon() { els.mapFsIcon.innerHTML = fsElement() ? FS_SHRINK : FS_EXPAND; }
